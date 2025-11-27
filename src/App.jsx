@@ -1,6 +1,10 @@
+import TournamentTree from "./TournamentTree"
+
 function App() {
     return (
-        <></>
+        <>
+            <TournamentTree></TournamentTree>
+        </>
     )
 }
 
