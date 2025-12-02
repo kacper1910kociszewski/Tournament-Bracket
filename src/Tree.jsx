@@ -1,91 +1,117 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
-function Tree({listOfPlayers}) {
-    const [listOfIds, setListOfIds] = useState([])
+function Tree({ listOfPlayers, getTree }) {
+    const [root, setRoot] = useState()
 
-    class Node { // dzika klasa node, tylko chce ją wykożystać do robienia drzewka
+    class Node {
         constructor(parent = null) {
-            this.left = null
-            this.right = null
-            this.parent = parent
-            this.player = null  // player assigned or advanced winner
-            this.id = 0
+            this.left = null;
+            this.right = null;
+            this.parent = parent;
+            this.player = null;
         }
     }
 
-    const buildTree = (list) => {
-        let root = new Node();
-        root.id = list[Math.floor(list.length / 2)]
-        if (list.length === 0) {
-            return;
+    // build the structure of the tree
+    const buildTree = (levels, parent = null) => {
+        if (levels === 0) return null;
+
+        const node = new Node(parent);
+
+        if (levels === 1) return node; // leaf
+
+        node.left = buildTree(levels - 1, node);
+        node.right = buildTree(levels - 1, node);
+
+        return node;
+    };
+
+
+    // get all of the leaves of the tree
+    const getLeaves = (root) => {
+        const leaves = [];
+        const stack = [root];
+
+        while (stack.length) {
+            const node = stack.pop();
+
+            if (!node.left && !node.right) {
+                leaves.push(node);
+            } else {
+                if (node.right) stack.push(node.right);
+                if (node.left) stack.push(node.left);
+            }
         }
+
+        return leaves;
+    };
+
+    // make the node the top of the tree, then check if there is a viable partner to fight
+    const subtreeHasPlayer = (node) => {
+        if (!node) return false;
+
+        const stack = [node];
+        while (stack.length) {
+            const n = stack.pop();
+            if (n.player !== null) return true;
+            if (n.left) stack.push(n.left);
+            if (n.right) stack.push(n.right);
+        }
+        return false;
+    };
+
+    const bubbleUp = (node) => {
+        let current = node;
+
+        while (current.parent) {
+            const parent = current.parent;
+            const sibling = parent.left === current ? parent.right : parent.left;
+
+            if (subtreeHasPlayer(sibling)) return;
+
+            if (parent.player !== null) return;
+
+            parent.player = current.player;
+            current.player = null;
+
+            current = parent;
+        }
+    };
+
+    // add a player to a leaf
+    const addPlayers = (players, root) => {
+        const leaves = getLeaves(root);
+
+        for (let i = 0; i < players.length; i++) {
+            leaves[i].player = players[i];
+        }
+
         
-        let list1 = []
-        let list2 = []
-        for(let i = 0; i < Math.floor(list.length / 2); i++) {
-            list1.push(list[i])
+        for (let leaf of leaves) {
+            if (leaf.player !== null) {
+                bubbleUp(leaf);
+            }
         }
-
-        for(let i = Math.floor(list.length / 2) + 1; i < list.length; i++) { 
-            list2.push(list[i])
-        }
-
-        root.left = buildTree(list1)
-        root.right = buildTree(list2)
 
         return root;
     };
 
-    const addPlayers = (listOfPlayers, rootNode) => {
-        
-        const stack = [root];
-        const leaves = [];
-
-        while (stack.length > 0) {
-            const node = stack.pop();
-
-            // leaf = no children
-            if (node.left === null && node.right === null) {
-                leaves.push(node);
-            }
-
-            // push children (order does not matter for leaf collection)
-            if (node.right) stack.push(node.right);
-            if (node.left) stack.push(node.left);
-        }
-        return leaves
-    }
-
+    // main logic
     useEffect(() => {
-        const listLength = listOfPlayers.length;
-        if (listLength == null) return;
+        if (!listOfPlayers.length) return;
 
-        // Determine required tree size
-        let sizeOfTheTree = 0;
-        for (let i = 0; Math.pow(2, i) - 1 < listLength; i++) {
-            sizeOfTheTree = i + 1;
+        let levels = 1;
+        while (Math.pow(2, levels - 1) < listOfPlayers.length) {
+            levels++;
         }
 
-        const numOfTurns = Math.pow(2, sizeOfTheTree) - 1;
+        const root = buildTree(levels)
 
-        // Create sequential list [1..numOfTurns]
-        const listOfNums = [];
-        for (let i = 1; i <= numOfTurns; i++) {
-            listOfNums.push(i);
-        }
-
-        const root = buildTree(listOfNums)
-
-        console.log(addPlayers(listOfPlayers, root));
-        
+        getTree(setRoot( addPlayers(listOfPlayers, root))) // tree
     }, [listOfPlayers]);
 
-
-    return(
-        <>
-
-        </>
-    )
+    return <>
+    </>;
 }
 
-export default Tree
+export default Tree;
