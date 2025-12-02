@@ -13,7 +13,6 @@ body {
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
-    border: 1px solid lime;
     height: 75vh;
     width: 33vw;
     
@@ -32,3 +31,36 @@ body {
     height: 5vh;
 }
 
+.connect-lines {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.connect-line {
+    display: flex;
+    flex-direction: row;
+
+    width: 20vw;
+}
+
+.connect-from {
+    border: 1px solid white;
+    border-left: none;
+    height: 15vh;
+    width: 10vw;
+}
+
+.connect-to {
+    border-bottom: 1px solid white;
+    width: 10vw;
+    height: 4vw;
+}
+
+.from-semifinal {
+    height: 30vh;
+}
+
+.to-final {
+    height: 15vh;
+}
