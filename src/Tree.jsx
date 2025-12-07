@@ -1,117 +1,177 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from 'react';
+import Match from './Match';
 
-function Tree({ listOfPlayers, getTree }) {
-    const [root, setRoot] = useState()
+function Tree({ players }) {
+  const [matches, setMatches] = useState([]);
 
-    class Node {
-        constructor(parent = null) {
-            this.left = null;
-            this.right = null;
-            this.parent = parent;
-            this.player = null;
-        }
+  // Initialize tournament bracket
+  useEffect(() => {
+    if (players.length > 0) {
+      createBracket(players);
+    }
+  }, [players]);
+
+  const createBracket = (playerList) => {
+    // Create first round matches
+    const firstRoundMatches = [];
+    for (let i = 0; i < playerList.length; i += 2) {
+      firstRoundMatches.push({
+        id: `match-${i / 2}-round-1`,
+        round: 1,
+        player1: { name: playerList[i], score: 0 },
+        player2: { name: playerList[i + 1] || null, score: 0 },
+        winner: null,
+        nextMatchId: null,
+        positionInRound: i / 2
+      });
     }
 
-    // build the structure of the tree
-    const buildTree = (levels, parent = null) => {
-        if (levels === 0) return null;
+    // Create subsequent rounds
+    const allMatches = [...firstRoundMatches];
+    let currentRoundMatches = firstRoundMatches;
+    let round = 2;
 
-        const node = new Node(parent);
-
-        if (levels === 1) return node; // leaf
-
-        node.left = buildTree(levels - 1, node);
-        node.right = buildTree(levels - 1, node);
-
-        return node;
-    };
-
-
-    // get all of the leaves of the tree
-    const getLeaves = (root) => {
-        const leaves = [];
-        const stack = [root];
-
-        while (stack.length) {
-            const node = stack.pop();
-
-            if (!node.left && !node.right) {
-                leaves.push(node);
-            } else {
-                if (node.right) stack.push(node.right);
-                if (node.left) stack.push(node.left);
-            }
-        }
-
-        return leaves;
-    };
-
-    // make the node the top of the tree, then check if there is a viable partner to fight
-    const subtreeHasPlayer = (node) => {
-        if (!node) return false;
-
-        const stack = [node];
-        while (stack.length) {
-            const n = stack.pop();
-            if (n.player !== null) return true;
-            if (n.left) stack.push(n.left);
-            if (n.right) stack.push(n.right);
-        }
-        return false;
-    };
-
-    const bubbleUp = (node) => {
-        let current = node;
-
-        while (current.parent) {
-            const parent = current.parent;
-            const sibling = parent.left === current ? parent.right : parent.left;
-
-            if (subtreeHasPlayer(sibling)) return;
-
-            if (parent.player !== null) return;
-
-            parent.player = current.player;
-            current.player = null;
-
-            current = parent;
-        }
-    };
-
-    // add a player to a leaf
-    const addPlayers = (players, root) => {
-        const leaves = getLeaves(root);
-
-        for (let i = 0; i < players.length; i++) {
-            leaves[i].player = players[i];
-        }
-
+    while (currentRoundMatches.length > 1) {
+      const nextRoundMatches = [];
+      
+      for (let i = 0; i < currentRoundMatches.length; i += 2) {
+        const match1 = currentRoundMatches[i];
+        const match2 = currentRoundMatches[i + 1];
         
-        for (let leaf of leaves) {
-            if (leaf.player !== null) {
-                bubbleUp(leaf);
+        const nextMatch = {
+          id: `match-${nextRoundMatches.length}-round-${round}`,
+          round: round,
+          player1: { name: null, score: 0 },
+          player2: { name: null, score: 0 },
+          winner: null,
+          nextMatchId: null,
+          positionInRound: nextRoundMatches.length
+        };
+
+        // Update current matches to point to next match
+        if (match1) match1.nextMatchId = nextMatch.id;
+        if (match2) match2.nextMatchId = nextMatch.id;
+        
+        nextRoundMatches.push(nextMatch);
+      }
+
+      allMatches.push(...nextRoundMatches);
+      currentRoundMatches = nextRoundMatches;
+      round++;
+    }
+
+    setMatches(allMatches);
+  };
+
+  const updateMatch = (matchId, updatedMatch) => {
+    setMatches(prevMatches => {
+      const newMatches = [...prevMatches];
+      const matchIndex = newMatches.findIndex(m => m.id === matchId);
+      
+      if (matchIndex !== -1) {
+        newMatches[matchIndex] = updatedMatch;
+        
+        // If there's a winner and a next match, update the next match
+        if (updatedMatch.winner && updatedMatch.nextMatchId) {
+          const nextMatchIndex = newMatches.findIndex(m => m.id === updatedMatch.nextMatchId);
+          if (nextMatchIndex !== -1) {
+            const nextMatch = newMatches[nextMatchIndex];
+            
+            // Find which matches in the current round point to this next match
+            const matchesInCurrentRound = newMatches.filter(m => 
+              m.round === updatedMatch.round && m.nextMatchId === updatedMatch.nextMatchId
+            );
+            
+            // Determine which position this match has in the matches pointing to the same next match
+            const matchInGroupIndex = matchesInCurrentRound.findIndex(m => m.id === matchId);
+            
+            if (matchInGroupIndex === 0) {
+              // First match in the pair -> update player1 in next match
+              nextMatch.player1.name = updatedMatch.winner;
+              nextMatch.player1.score = 0;
+            } else if (matchInGroupIndex === 1) {
+              // Second match in the pair -> update player2 in next match
+              nextMatch.player2.name = updatedMatch.winner;
+              nextMatch.player2.score = 0;
             }
+            
+            newMatches[nextMatchIndex] = { ...nextMatch };
+          }
         }
+      }
+      
+      return newMatches;
+    });
+  };
 
-        return root;
-    };
-
-    // main logic
-    useEffect(() => {
-        if (!listOfPlayers.length) return;
-
-        let levels = 1;
-        while (Math.pow(2, levels - 1) < listOfPlayers.length) {
-            levels++;
+  const incrementScore = (matchId, playerNumber) => {
+    setMatches(prevMatches => {
+      const newMatches = [...prevMatches];
+      const matchIndex = newMatches.findIndex(m => m.id === matchId);
+      
+      if (matchIndex !== -1) {
+        const match = newMatches[matchIndex];
+        if (playerNumber === 1 && match.player1.name) {
+          match.player1.score++;
+        } else if (playerNumber === 2 && match.player2.name) {
+          match.player2.score++;
         }
+        newMatches[matchIndex] = { ...match };
+      }
+      
+      return newMatches;
+    });
+  };
 
-        const root = buildTree(levels)
+  const finishMatch = (matchId) => {
+    const match = matches.find(m => m.id === matchId);
+    if (!match || match.winner) return;
 
-        getTree(setRoot( addPlayers(listOfPlayers, root))) // tree
-    }, [listOfPlayers]);
+    let winner = null;
+    if (match.player1.score > match.player2.score) {
+      winner = match.player1.name;
+    } else if (match.player2.score > match.player1.score) {
+      winner = match.player2.name;
+    }
+    
+    if (winner) {
+      const updatedMatch = { ...match, winner };
+      updateMatch(matchId, updatedMatch);
+    }
+  };
 
-    return <>
-    </>;
+  // Group matches by round for display
+  const matchesByRound = {};
+  matches.forEach(match => {
+    if (!matchesByRound[match.round]) {
+      matchesByRound[match.round] = [];
+    }
+    matchesByRound[match.round].push(match);
+  });
+
+  const rounds = Object.keys(matchesByRound).sort((a, b) => a - b);
+
+  return (
+    <div style={{ display: 'flex', gap: '40px', padding: '20px' }}>
+      {rounds.map(round => (
+        <div key={round} style={{ minWidth: '250px' }}>
+          <h3>Round {round}</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {matchesByRound[round]
+              .sort((a, b) => a.positionInRound - b.positionInRound)
+              .map(match => (
+              <Match
+                key={match.id}
+                match={match}
+                onIncrementScore={incrementScore}
+                onFinishMatch={finishMatch}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default Tree;
