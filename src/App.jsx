@@ -1,9 +1,18 @@
+import { useEffect, useState } from "react"
+import Tree from "./Tree"
 import TournamentTree from "./TournamentTree"
 
 function App() {
+    const [players, setPlayers] = useState([])
+    const [root, setRoot] = useState() // tree
+
+    useEffect(() => {
+        setPlayers(["Grzegorz", "Władzio", "Kacper Kociszewski", "Mao Zedong", "Testownik 3000", "urzytkownik 11"]);
+    }, []);
+
     return (
         <>
-            <TournamentTree></TournamentTree>
+            <Tree listOfPlayers={players} getTree={setRoot}></Tree>
         </>
     )
 }
