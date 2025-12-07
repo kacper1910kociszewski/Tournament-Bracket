@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import Tree from "./Tree"
+import TournamentTree from "./TournamentTree"
 
 function App() {
     const [players, setPlayers] = useState([])
