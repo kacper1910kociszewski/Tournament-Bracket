@@ -4,6 +4,16 @@ function Match({ match, onIncrementScore, onFinishMatch }) {
   const isFinished = winner !== null;
   const hasPlayers = player1.name && player2.name;
 
+  const handleIncrementClick = (playerNumber) => {
+    console.log(`Adding point to player ${playerNumber} in match ${id}`);
+    onIncrementScore(id, playerNumber);
+  };
+
+  const handleFinishClick = () => {
+    console.log(`Finishing match ${id}`);
+    onFinishMatch(id);
+  };
+
   return (
     <div style={{
       border: '2px solid #333',
@@ -25,7 +35,7 @@ function Match({ match, onIncrementScore, onFinishMatch }) {
           <div>Score: {player1.score}</div>
           {!isFinished && player1.name && (
             <button 
-              onClick={() => onIncrementScore(id, 1)}
+              onClick={() => handleIncrementClick(1)}
               style={{ marginTop: '5px' }}
             >
               Add Point
@@ -49,7 +59,7 @@ function Match({ match, onIncrementScore, onFinishMatch }) {
           <div>Score: {player2.score}</div>
           {!isFinished && player2.name && (
             <button 
-              onClick={() => onIncrementScore(id, 2)}
+              onClick={() => handleIncrementClick(2)}
               style={{ marginTop: '5px' }}
             >
               Add Point
@@ -71,7 +81,7 @@ function Match({ match, onIncrementScore, onFinishMatch }) {
       ) : (
         hasPlayers && (
           <button 
-            onClick={() => onFinishMatch(id)}
+            onClick={handleFinishClick}
             style={{
               marginTop: '10px',
               padding: '8px',

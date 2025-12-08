@@ -106,20 +106,28 @@ function Tree({ players }) {
 
   const incrementScore = (matchId, playerNumber) => {
     setMatches(prevMatches => {
-      const newMatches = [...prevMatches];
-      const matchIndex = newMatches.findIndex(m => m.id === matchId);
-      
-      if (matchIndex !== -1) {
-        const match = newMatches[matchIndex];
-        if (playerNumber === 1 && match.player1.name) {
-          match.player1.score++;
-        } else if (playerNumber === 2 && match.player2.name) {
-          match.player2.score++;
+      return prevMatches.map(match => {
+        if (match.id === matchId) {
+          if (playerNumber === 1 && match.player1.name) {
+            return {
+              ...match,
+              player1: {
+                ...match.player1,
+                score: match.player1.score + 1
+              }
+            };
+          } else if (playerNumber === 2 && match.player2.name) {
+            return {
+              ...match,
+              player2: {
+                ...match.player2,
+                score: match.player2.score + 1
+              }
+            };
+          }
         }
-        newMatches[matchIndex] = { ...match };
-      }
-      
-      return newMatches;
+        return match;
+      });
     });
   };
 
