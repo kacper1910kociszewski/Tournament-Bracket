@@ -104,24 +104,32 @@ function Tree({ players }) {
     });
   };
 
-  const incrementScore = (matchId, playerNumber) => {
+  const incrementScore = (matchId, playerNumber, action = 'increment') => {
     setMatches(prevMatches => {
       return prevMatches.map(match => {
         if (match.id === matchId) {
           if (playerNumber === 1 && match.player1.name) {
+            const newScore = action === 'increment' 
+              ? match.player1.score + 1 
+              : Math.max(0, match.player1.score - 1);
+            
             return {
               ...match,
               player1: {
                 ...match.player1,
-                score: match.player1.score + 1
+                score: newScore
               }
             };
           } else if (playerNumber === 2 && match.player2.name) {
+            const newScore = action === 'increment' 
+              ? match.player2.score + 1 
+              : Math.max(0, match.player2.score - 1);
+            
             return {
               ...match,
               player2: {
                 ...match.player2,
-                score: match.player2.score + 1
+                score: newScore
               }
             };
           }
@@ -140,6 +148,9 @@ function Tree({ players }) {
       winner = match.player1.name;
     } else if (match.player2.score > match.player1.score) {
       winner = match.player2.name;
+    } else {
+      // If scores are equal, we could handle a tie, but for now, no winner
+      return;
     }
     
     if (winner) {
@@ -159,25 +170,66 @@ function Tree({ players }) {
 
   const rounds = Object.keys(matchesByRound).sort((a, b) => a - b);
 
+  // Calculate the number of matches in the largest round
+  const maxMatchesInRound = Math.max(...Object.values(matchesByRound).map(arr => arr.length));
+  const roundHeight = `${100 / maxMatchesInRound}vh`;
+
   return (
-    <div style={{ display: 'flex', gap: '40px', padding: '20px' }}>
-      {rounds.map(round => (
-        <div key={round} style={{ minWidth: '250px' }}>
-          <h3>Round {round}</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {matchesByRound[round]
-              .sort((a, b) => a.positionInRound - b.positionInRound)
-              .map(match => (
-              <Match
-                key={match.id}
-                match={match}
-                onIncrementScore={incrementScore}
-                onFinishMatch={finishMatch}
-              />
-            ))}
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '8vw',
+      minHeight: '80vh',
+      padding: '4vh 2vw',
+      backgroundColor: '#f5f5f5'
+    }}>
+      {rounds.map(round => {
+        const roundMatches = matchesByRound[round]
+          .sort((a, b) => a.positionInRound - b.positionInRound);
+        
+        return (
+          <div key={round} style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-evenly',
+            minHeight: '70vh',
+            minWidth: '20vw'
+          }}>
+            <h3 style={{
+              textAlign: 'center',
+              marginBottom: '2vh',
+              color: '#333',
+              borderBottom: '2px solid #333',
+              paddingBottom: '1vh'
+            }}>
+              Round {round}
+            </h3>
+            
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-evenly',
+              gap: '4vh',
+              flex: 1
+            }}>
+              {roundMatches.map(match => (
+                <div key={match.id} style={{
+                  minHeight: roundHeight,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <Match
+                    match={match}
+                    onIncrementScore={incrementScore}
+                    onFinishMatch={finishMatch}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
