@@ -1,19 +1,62 @@
-import * as React from 'react';
-import { TextField, Button, Typography, Box } from '@mui/material';
+import { useState } from 'react';
+import { TextField, Button, Typography, Box, Alert, CircularProgress } from '@mui/material';
+import { authService } from '../../services/authService';
 
 const LoginComponent = ({ onSwitchToRegister }) => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle login logic here
-    console.log('Login submitted');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    if (error) setError('')
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    
+    if (!formData.email || !formData.password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    const result = await authService.loginWithEmail(formData.email, formData.password);
+
+    setLoading(false);
+
+    if (result.success) {
+      console.log('Login successful:', result.user);
+      // Redirect to the dashboard
+    } else {
+      setError(result.error);
+    }
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}> {/* Changed from 25vw to 100% */}
+    <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
       <TextField
         fullWidth
+        name="email"
         label="Email"
+        value={formData.email}
+        onChange={handleChange}
         variant="outlined"
+        disabled={loading}
         sx={{
           mb: 3,
           '& .MuiOutlinedInput-root': {
@@ -44,9 +87,13 @@ const LoginComponent = ({ onSwitchToRegister }) => {
 
       <TextField
         fullWidth
+        name="password"
         label="Password"
         type="password"
+        value={formData.password}
+        onChange={handleChange}
         variant="outlined"
+        disabled={loading}
         sx={{
           mb: 3,
           '& .MuiOutlinedInput-root': {
@@ -79,20 +126,23 @@ const LoginComponent = ({ onSwitchToRegister }) => {
         type="submit"
         fullWidth
         variant="contained"
+        disabled={loading}
         sx={{
           mt: 2,
           mb: 2,
-          py: 1.8, // Increased padding
-          fontSize: '1.1rem', // Larger font
+          py: 1.5,
           backgroundColor: 'rgba(255, 255, 255, 0.2)',
           color: '#ffffff',
           fontWeight: 'bold',
           '&:hover': {
             backgroundColor: 'rgba(255, 255, 255, 0.3)',
           },
+          '&:disabled': {
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          },
         }}
       >
-        Sign In
+        {loading ? <CircularProgress size={24} /> : 'Sign In'}
       </Button>
 
       <Typography 
@@ -100,8 +150,7 @@ const LoginComponent = ({ onSwitchToRegister }) => {
         align="center"
         sx={{ 
           color: 'rgba(255, 255, 255, 0.7)',
-          mt: 2,
-          fontSize: '1rem' // Slightly larger
+          mt: 2
         }}
       >
         Don't have an account?{' '}
@@ -114,7 +163,6 @@ const LoginComponent = ({ onSwitchToRegister }) => {
             fontWeight: 'bold',
             cursor: 'pointer',
             textDecoration: 'underline',
-            fontSize: '1rem',
             '&:hover': {
               color: 'rgba(255, 255, 255, 0.8)',
             }

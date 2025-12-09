@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { Box, Button, Typography, Divider } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -6,12 +5,12 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 const SocialLoginComponent = () => {
   const handleGoogleLogin = () => {
     console.log('Google login clicked');
-    // Add your Google OAuth logic here
+    // Add Google login logic
   }; 
 
   const handleGitHubLogin = () => {
     console.log('GitHub login clicked');
-    // Add your GitHub OAuth logic here
+    // Add GitHub login logic
   };
 
   return (
