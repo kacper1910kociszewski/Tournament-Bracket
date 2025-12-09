@@ -1,13 +1,12 @@
-import { useState } from 'react';
-import TournamentTree from './TournamentTree';
+import { AuthProvider } from './contexts/AuthContext'
+import AppRoutes from './Routes'
 
 function App() {
-    
-    return (
-        <div>
-            <TournamentTree></TournamentTree>
-        </div>
-    );
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  )
 }
 
-export default App;
+export default App
