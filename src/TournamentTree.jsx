@@ -10,14 +10,14 @@ function TournamentTree() {
     // Add new player to the list
     const addPlayer = () => {
         if (inputName.trim() !== '') {
-            setPlayers([...players, inputName.trim()]);
+            setPlayers([...players, inputName.trim()])
             setInputName("") // Clear the input
         }
     }
 
     // Remove player from the list
     const removePlayer = (index) => {
-        const newPlayers = players.filter((_, i) => i !== index);
+        const newPlayers = players.filter((_, i) => i !== index)
         setPlayers(newPlayers)
     }
 
