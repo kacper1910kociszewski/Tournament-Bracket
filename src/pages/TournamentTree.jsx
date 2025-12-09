@@ -1,12 +1,44 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './TournamentTree.css'
-import Tree from './Tree'
+import Tree from '../Tree'
+import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth'
+import { useNavigate } from 'react-router-dom'
 import { minHeight } from '@mui/system'
 
 function TournamentTree() {
     const [players, setPlayers] = useState([])
     const [inputName, setInputName] = useState("")
     const [tournamentStarted, setTournamentStarted] = useState(false)
+    const [user, setUser] = useState(null)
+    const navigate = useNavigate()
+    const auth = getAuth()
+
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser)
+            
+            // Redirect to login if not authenticated
+            if (!currentUser) {
+                navigate('/login')
+            }
+        })
+
+        return () => unsubscribe()
+    }, [auth, navigate])
+
+    // Logout function
+    const logout = async () => {
+        try {
+            await signOut(auth)
+            console.log("User signed out successfully!")
+            // Navigation is handled by the auth state observer above
+        } catch (error) {
+            console.error("Logout error:", error.code, error.message)
+            // Optional: Show error message to user
+            alert(`Logout failed: ${error.message}`)
+        }
+    }
 
     // Add new player to the list
     const addPlayer = () => {
@@ -155,6 +187,9 @@ function TournamentTree() {
         <div style={containerStyle}>
             {!tournamentStarted ? (
                 <div style={menuContainerStyle}>
+                    <h1 style={titleStyle}>Welcome ({user?.email || 'User'})</h1>
+                    <button id='logout' style={buttonStyle} onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(244, 67, 54, 0.4)'}
+                        onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'} onClick={logout}>Log Out</button>
                     <h1 style={titleStyle}>Add Players Menu</h1>
                     <input 
                         type="text" 
