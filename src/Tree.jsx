@@ -1,19 +1,19 @@
-import { useState, useEffect } from 'react';
-import Match from './Match';
+import { useState, useEffect } from 'react'
+import Match from './Match'
 
 function Tree({ players }) {
-  const [matches, setMatches] = useState([]);
+  const [matches, setMatches] = useState([])
 
   // Initialize tournament bracket
   useEffect(() => {
     if (players.length > 0) {
-      createBracket(players);
+      createBracket(players)
     }
-  }, [players]);
+  }, [players])
 
   const createBracket = (playerList) => {
     // Create first round matches
-    const firstRoundMatches = [];
+    const firstRoundMatches = []
     for (let i = 0; i < playerList.length; i += 2) {
       firstRoundMatches.push({
         id: `match-${i / 2}-round-1`,
@@ -27,16 +27,16 @@ function Tree({ players }) {
     }
 
     // Create subsequent rounds
-    const allMatches = [...firstRoundMatches];
-    let currentRoundMatches = firstRoundMatches;
-    let round = 2;
+    const allMatches = [...firstRoundMatches]
+    let currentRoundMatches = firstRoundMatches
+    let round = 2
 
     while (currentRoundMatches.length > 1) {
-      const nextRoundMatches = [];
+      const nextRoundMatches = []
       
       for (let i = 0; i < currentRoundMatches.length; i += 2) {
-        const match1 = currentRoundMatches[i];
-        const match2 = currentRoundMatches[i + 1];
+        const match1 = currentRoundMatches[i]
+        const match2 = currentRoundMatches[i + 1]
         
         const nextMatch = {
           id: `match-${nextRoundMatches.length}-round-${round}`,
@@ -49,33 +49,33 @@ function Tree({ players }) {
         };
 
         // Update current matches to point to next match
-        if (match1) match1.nextMatchId = nextMatch.id;
-        if (match2) match2.nextMatchId = nextMatch.id;
+        if (match1) match1.nextMatchId = nextMatch.id
+        if (match2) match2.nextMatchId = nextMatch.id
         
-        nextRoundMatches.push(nextMatch);
+        nextRoundMatches.push(nextMatch)
       }
 
-      allMatches.push(...nextRoundMatches);
-      currentRoundMatches = nextRoundMatches;
-      round++;
+      allMatches.push(...nextRoundMatches)
+      currentRoundMatches = nextRoundMatches
+      round++
     }
 
-    setMatches(allMatches);
+    setMatches(allMatches)
   };
 
   const updateMatch = (matchId, updatedMatch) => {
     setMatches(prevMatches => {
-      const newMatches = [...prevMatches];
-      const matchIndex = newMatches.findIndex(m => m.id === matchId);
+      const newMatches = [...prevMatches]
+      const matchIndex = newMatches.findIndex(m => m.id === matchId)
       
       if (matchIndex !== -1) {
-        newMatches[matchIndex] = updatedMatch;
+        newMatches[matchIndex] = updatedMatch
         
         // If there's a winner and a next match, update the next match
         if (updatedMatch.winner && updatedMatch.nextMatchId) {
-          const nextMatchIndex = newMatches.findIndex(m => m.id === updatedMatch.nextMatchId);
+          const nextMatchIndex = newMatches.findIndex(m => m.id === updatedMatch.nextMatchId)
           if (nextMatchIndex !== -1) {
-            const nextMatch = newMatches[nextMatchIndex];
+            const nextMatch = newMatches[nextMatchIndex]
             
             // Find which matches in the current round point to this next match
             const matchesInCurrentRound = newMatches.filter(m => 
@@ -83,19 +83,19 @@ function Tree({ players }) {
             );
             
             // Determine which position this match has in the matches pointing to the same next match
-            const matchInGroupIndex = matchesInCurrentRound.findIndex(m => m.id === matchId);
+            const matchInGroupIndex = matchesInCurrentRound.findIndex(m => m.id === matchId)
             
             if (matchInGroupIndex === 0) {
               // First match in the pair -> update player1 in next match
-              nextMatch.player1.name = updatedMatch.winner;
-              nextMatch.player1.score = 0;
+              nextMatch.player1.name = updatedMatch.winner
+              nextMatch.player1.score = 0
             } else if (matchInGroupIndex === 1) {
               // Second match in the pair -> update player2 in next match
-              nextMatch.player2.name = updatedMatch.winner;
-              nextMatch.player2.score = 0;
+              nextMatch.player2.name = updatedMatch.winner
+              nextMatch.player2.score = 0
             }
             
-            newMatches[nextMatchIndex] = { ...nextMatch };
+            newMatches[nextMatchIndex] = { ...nextMatch }
           }
         }
       }
@@ -110,8 +110,7 @@ function Tree({ players }) {
         if (match.id === matchId) {
           if (playerNumber === 1 && match.player1.name) {
             const newScore = action === 'increment' 
-              ? match.player1.score + 1 
-              : Math.max(0, match.player1.score - 1);
+              ? match.player1.score + 1 : Math.max(0, match.player1.score - 1)
             
             return {
               ...match,
@@ -123,7 +122,7 @@ function Tree({ players }) {
           } else if (playerNumber === 2 && match.player2.name) {
             const newScore = action === 'increment' 
               ? match.player2.score + 1 
-              : Math.max(0, match.player2.score - 1);
+              : Math.max(0, match.player2.score - 1)
             
             return {
               ...match,
@@ -134,45 +133,45 @@ function Tree({ players }) {
             };
           }
         }
-        return match;
+        return match
       });
     });
   };
 
   const finishMatch = (matchId) => {
     const match = matches.find(m => m.id === matchId);
-    if (!match || match.winner) return;
+    if (!match || match.winner) return
 
-    let winner = null;
+    let winner = null
     if (match.player1.score > match.player2.score) {
-      winner = match.player1.name;
+      winner = match.player1.name
     } else if (match.player2.score > match.player1.score) {
-      winner = match.player2.name;
+      winner = match.player2.name
     } else {
       // If scores are equal, we could handle a tie, but for now, no winner
-      return;
+      return
     }
     
     if (winner) {
-      const updatedMatch = { ...match, winner };
-      updateMatch(matchId, updatedMatch);
+      const updatedMatch = { ...match, winner }
+      updateMatch(matchId, updatedMatch)
     }
   };
 
   // Group matches by round for display
-  const matchesByRound = {};
+  const matchesByRound = {}
   matches.forEach(match => {
     if (!matchesByRound[match.round]) {
-      matchesByRound[match.round] = [];
+      matchesByRound[match.round] = []
     }
-    matchesByRound[match.round].push(match);
-  });
+    matchesByRound[match.round].push(match)
+  })
 
-  const rounds = Object.keys(matchesByRound).sort((a, b) => a - b);
+  const rounds = Object.keys(matchesByRound).sort((a, b) => a - b)
 
   // Calculate the number of matches in the largest round
-  const maxMatchesInRound = Math.max(...Object.values(matchesByRound).map(arr => arr.length));
-  const roundHeight = `${100 / maxMatchesInRound}vh`;
+  const maxMatchesInRound = Math.max(...Object.values(matchesByRound).map(arr => arr.length))
+  const roundHeight = `${100 / maxMatchesInRound}vh`
 
   return (
     <div style={{
@@ -185,7 +184,7 @@ function Tree({ players }) {
     }}>
       {rounds.map(round => {
         const roundMatches = matchesByRound[round]
-          .sort((a, b) => a.positionInRound - b.positionInRound);
+          .sort((a, b) => a.positionInRound - b.positionInRound)
         
         return (
           <div key={round} style={{
@@ -228,10 +227,10 @@ function Tree({ players }) {
               ))}
             </div>
           </div>
-        );
+        )
       })}
     </div>
   );
 }
 
-export default Tree;
+export default Tree
