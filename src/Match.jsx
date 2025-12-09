@@ -3,15 +3,15 @@ function Match({ match, onIncrementScore, onFinishMatch }) {
 
   const isFinished = winner !== null;
   const hasBothPlayers = player1.name && player2.name;
-  const isTBDMatch = player1.name === 'TBD' && player2.name === 'TBD';
+  const isTBDMatch = player1.name === 'TBD' && player2.name === 'TBD'
 
   // Separate handlers for increment and decrement
   const handleIncrement = (playerNumber) => {
-    onIncrementScore(id, playerNumber, 'increment');
+    onIncrementScore(id, playerNumber, 'increment')
   };
 
   const handleDecrement = (playerNumber) => {
-    onIncrementScore(id, playerNumber, 'decrement');
+    onIncrementScore(id, playerNumber, 'decrement')
   };
 
   return (
