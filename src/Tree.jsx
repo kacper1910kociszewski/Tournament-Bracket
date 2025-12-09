@@ -176,11 +176,11 @@ function Tree({ players }) {
   return (
     <div style={{
       display: 'flex',
+      color: 'white',
       justifyContent: 'center',
       gap: '8vw',
       minHeight: '80vh',
       padding: '4vh 2vw',
-      backgroundColor: '#f5f5f5'
     }}>
       {rounds.map(round => {
         const roundMatches = matchesByRound[round]
@@ -197,7 +197,6 @@ function Tree({ players }) {
             <h3 style={{
               textAlign: 'center',
               marginBottom: '2vh',
-              color: '#333',
               borderBottom: '2px solid #333',
               paddingBottom: '1vh'
             }}>

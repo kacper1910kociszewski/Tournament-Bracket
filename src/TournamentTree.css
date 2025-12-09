@@ -1,0 +1,11 @@
+body {
+    padding: 0;
+    margin: 0;
+    background: linear-gradient(135deg, #0c0c0c 0%, #3c3c3c 50%, #8b8b8b 100%);
+    min-height: 100vh;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
