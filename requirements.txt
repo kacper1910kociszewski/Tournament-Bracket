@@ -1,0 +1,9 @@
+# WhisperX Transcription System Requirements
+# ==========================================
+#
+# Installation order:
+# 1. For GPU (NVIDIA CUDA): pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# 2. For CPU only: pip install torch torchvision torchaudio
+# 3. Then install the packages below
+
+whisperx>=3.1.1
