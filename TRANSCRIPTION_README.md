@@ -159,6 +159,26 @@ Tournament-Bracket/
 
 ---
 
+## 🧪 Testing the Installation
+
+Before using the system with real recordings, verify everything is set up correctly:
+
+```bash
+python test_system.py
+```
+
+This will test:
+- Folder structure
+- Script syntax
+- Empty recordings handling
+- Logging system
+- .gitignore configuration
+- Documentation
+
+All tests should pass (6/6) before proceeding.
+
+---
+
 ## 🚀 Usage
 
 ### Manual Execution
