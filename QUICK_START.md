@@ -57,8 +57,8 @@ All checks should pass ✓
 
 ### 1. Add Test File
 ```bash
-# Copy an MP3 file to recordings/ folder
-copy "C:\path\to\your\recording.mp3" recordings\
+# Copy an MP3 file to recordings\ folder
+copy "C:\path\to\your\recording.mp3" "recordings\"
 ```
 
 ### 2. Run Transcription
