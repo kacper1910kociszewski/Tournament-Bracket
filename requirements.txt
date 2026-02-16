@@ -1,0 +1,14 @@
+# WhisperX and dependencies for audio transcription
+# Install PyTorch with CUDA support first (for GPU acceleration):
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Or install CPU-only version:
+# pip install torch torchvision torchaudio
+
+# WhisperX for transcription with diarization
+whisperx
+
+# Additional dependencies (usually installed with whisperx)
+# ffmpeg-python is required but should be installed system-wide
+# HuggingFace CLI is needed for authentication (for diarization)
+# Install with: pip install huggingface-hub

@@ -1,0 +1,27 @@
+# WhisperX Configuration Example
+# You can modify these settings in auto_transcribe.py
+
+# Folder paths
+RECORDINGS_FOLDER=recordings
+ARCHIVE_FOLDER=archive
+LOG_FOLDER=logs
+
+# WhisperX settings
+WHISPER_MODEL=medium  # Options: tiny, base, small, medium, large
+LANGUAGE=pl           # Polish language code
+
+# Model size recommendations:
+# - tiny: Fastest, lowest accuracy (~1GB GPU RAM)
+# - base: Fast, medium accuracy (~1GB GPU RAM)
+# - small: Balanced, good accuracy (~2GB GPU RAM)
+# - medium: Better accuracy, slower (~5GB GPU RAM) - RECOMMENDED for RTX 3060
+# - large: Best accuracy, slowest (~10GB GPU RAM)
+
+# Language codes:
+# pl - Polish
+# en - English
+# de - German
+# es - Spanish
+# fr - French
+# it - Italian
+# (and many more, see WhisperX documentation)
